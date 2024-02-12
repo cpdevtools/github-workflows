@@ -1,0 +1,38 @@
+name: Runs test Build
+on:
+  workflow_call:
+    inputs:
+      pnpmVersion:
+        type: string
+        description: The version of pnpm to install
+        required: false
+        default: 7.26.2
+      nodeVersion:
+        type: string
+        description: The version of NodeJs to install
+        required: false
+        default: 16.18.1
+    secrets:
+      GH_TOKEN:
+        description: The token to use to login to the github container registry
+        required: true
+
+jobs:
+  check_build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Project
+        uses: actions/checkout@v3.3.0
+
+      - name: Install Node & Dependencies
+        uses: cpdevtools/github-workflows/.github/actions/common/node-setup-pnpm@main
+        with:
+          pnpmVersion: ${{ inputs.pnpmVersion }}
+          nodeVersion: ${{ inputs.nodeVersion }}
+          githubToken: ${{ secrets.GH_TOKEN }}
+        
+
+      - name: Build
+        run: pnpm run actions-build
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
