@@ -17,10 +17,18 @@ on:
         description: Github Actor
         required: false
         default: ${{ github.actor }}
+      publishToNpm:
+        type: boolean
+        description: Publish to NPM
+        required: false
+        default: false
     secrets:
       GH_TOKEN:
         description: A GitHub token
         required: true
+      NPM_TOKEN:
+        description: A NPM token
+        required: false
 
 jobs:
   setup:
@@ -102,20 +110,58 @@ jobs:
           if-no-files-found: error
           path: ./dist/pack/*.tgz
 
-#   create-release:
-#     runs-on: ubuntu-latest
-#     needs: [publish-docker-image]
-#     steps:
-#       - name: Checkout Project
-#         uses: actions/checkout@v3.3.0
+  publish-libs:
+    runs-on: ubuntu-latest
+    needs: pack-libs
+    steps:
+      - name: Checkout Project
+        uses: actions/checkout@v3.3.0
 
-#       - name: Create Release
-#         id: create_release
-#         uses: IdealSupply/github-workflows/.github/actions/common/create-release@main
+      - name: Install Node & Dependencies
+        uses: cpdevtools/github-workflows/.github/actions/common/node-setup-pnpm@main
+        with:
+          pnpmVersion: ${{ inputs.pnpmVersion }}
+          nodeVersion: ${{ inputs.nodeVersion }}
+          githubToken: ${{ secrets.GH_TOKEN }}
 
-#       # fixes an issue with the external actions/workflows not being able to create/publish a release that is not draft
-#       - uses: eregon/publish-release@v1
-#         env:
-#           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-#         with:
-#           release_id: ${{ steps.create_release.outputs.releaseId }}
+      - uses: actions/download-artifact@v3
+        with:
+          name: nglibs-packs
+          path: ./dist/pack/
+
+      - name: Publish Libraries to Github
+        run: pnpm run actions-release-libs
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: "${{ inputs.nodeVersion }}"
+          registry-url: "https://registry.npmjs.org"
+          scope: ${{ github.repository_owner }}
+
+      - name: Publish Libraries to NPM
+        if: ${{ inputs.publishToNpm == true }}
+        run: pnpm run actions-release-libs
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN  }}
+
+  create-release:
+    runs-on: ubuntu-latest
+    needs: [publish-libs]
+    steps:
+      - name: Checkout Project
+        uses: actions/checkout@v3.3.0
+
+      - name: Create Release
+        id: create_release
+        uses: cpdevtools/github-workflows/.github/actions/common/create-release@main
+
+      # fixes an issue with the external actions/workflows not being able to create/publish a release that is not draft
+      - uses: eregon/publish-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+        with:
+          release_id: ${{ steps.create_release.outputs.releaseId }}
