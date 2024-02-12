@@ -72,6 +72,35 @@ jobs:
           if-no-files-found: error
           path: ./dist
 
+  pack-libs:
+    runs-on: ubuntu-latest
+    needs: build-libs
+    steps:
+      - name: Checkout Project
+        uses: actions/checkout@v3.3.0
+
+      - name: Install Node & Dependencies
+        uses: cpdevtools/github-workflows/.github/actions/common/node-setup-pnpm@main
+        with:
+          pnpmVersion: ${{ inputs.pnpmVersion }}
+          nodeVersion: ${{ inputs.nodeVersion }}
+          githubToken: ${{ secrets.GH_TOKEN }}
+
+      - uses: actions/download-artifact@v3
+        with:
+          name: nglibs
+          path: ./dist/
+
+      - name: Pack Libraries
+        run: pnpm run actions-pack-libs
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: nglibs-packs
+          if-no-files-found: error
+          path: ./dist/pack/*.tgz
 
 #   create-release:
 #     runs-on: ubuntu-latest
