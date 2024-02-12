@@ -89,7 +89,12 @@ jobs:
       - uses: actions/download-artifact@v3
         with:
           name: nglibs
-          path: ./dist/
+          path: ./dist
+
+      - name: dirs
+        run: |
+          ls -al
+          ls -al ./dist
 
       - name: Pack Libraries
         run: pnpm run actions-pack-libs
