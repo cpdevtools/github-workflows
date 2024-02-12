@@ -136,10 +136,13 @@ jobs:
 
 
       - uses: actions/setup-node@v3
+        if: ${{ inputs.publishToNpm == true }}
         with:
           node-version: "${{ inputs.nodeVersion }}"
           registry-url: "https://registry.npmjs.org"
           scope: ${{ github.repository_owner }}
+          always-auth: true
+
 
       - name: Publish Libraries to NPM
         if: ${{ inputs.publishToNpm == true }}
