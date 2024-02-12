@@ -1,0 +1,92 @@
+name: Publish
+on:
+  workflow_call:
+    inputs:
+      pnpmVersion:
+        type: string
+        description: The version of pnpm to install
+        required: false
+        default: 7.26.2
+      nodeVersion:
+        type: string
+        description: The version of NodeJs to install
+        required: false
+        default: 16.18.1
+      githubActor:
+        type: string
+        description: Github Actor
+        required: false
+        default: ${{ github.actor }}
+    secrets:
+      GH_TOKEN:
+        description: A GitHub token
+        required: true
+
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      isPrerelease: ${{ steps.version.outputs.isPrerelease }}
+      isLatest: ${{ steps.version.outputs.isLatest }}
+      isHighest: ${{ steps.version.outputs.isHighest }}
+      major: ${{ steps.version.outputs.major }}
+      minor: ${{ steps.version.outputs.minor }}
+      patch: ${{ steps.version.outputs.patch }}
+      
+    steps:
+      - name: Checkout Project
+        uses: actions/checkout@v3.3.0
+
+      - name: Check Version
+        id: version
+        uses: cpdevtools/github-workflows/.github/actions/common/check-version@main
+
+
+
+  build-libs:
+    runs-on: ubuntu-latest
+    needs: setup
+    steps:
+      - name: Checkout Project
+        uses: actions/checkout@v3.3.0
+      
+      - name: Install Node & Dependencies
+        uses: cpdevtools/github-workflows/.github/actions/common/node-setup-pnpm@main
+        with:
+          pnpmVersion: ${{ inputs.pnpmVersion }}
+          nodeVersion: ${{ inputs.nodeVersion }}
+          githubToken: ${{ secrets.GH_TOKEN }}
+
+      - name: Build Libraries
+        run: pnpm run actions-build-libs
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: app-libs
+          if-no-files-found: error
+          path: ./dist/
+
+ 
+
+
+#   create-release:
+#     runs-on: ubuntu-latest
+#     needs: [publish-docker-image]
+#     steps:
+#       - name: Checkout Project
+#         uses: actions/checkout@v3.3.0
+
+#       - name: Create Release
+#         id: create_release
+#         uses: IdealSupply/github-workflows/.github/actions/common/create-release@main
+
+#       # fixes an issue with the external actions/workflows not being able to create/publish a release that is not draft
+#       - uses: eregon/publish-release@v1
+#         env:
+#           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+#         with:
+#           release_id: ${{ steps.create_release.outputs.releaseId }}
