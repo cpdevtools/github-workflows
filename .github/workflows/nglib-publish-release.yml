@@ -22,7 +22,6 @@ on:
         description: A GitHub token
         required: true
 
-
 jobs:
   setup:
     runs-on: ubuntu-latest
@@ -34,7 +33,7 @@ jobs:
       major: ${{ steps.version.outputs.major }}
       minor: ${{ steps.version.outputs.minor }}
       patch: ${{ steps.version.outputs.patch }}
-      
+
     steps:
       - name: Checkout Project
         uses: actions/checkout@v3.3.0
@@ -43,21 +42,24 @@ jobs:
         id: version
         uses: cpdevtools/github-workflows/.github/actions/common/check-version@main
 
-
-
   build-libs:
     runs-on: ubuntu-latest
     needs: setup
     steps:
       - name: Checkout Project
         uses: actions/checkout@v3.3.0
-      
+
       - name: Install Node & Dependencies
         uses: cpdevtools/github-workflows/.github/actions/common/node-setup-pnpm@main
         with:
           pnpmVersion: ${{ inputs.pnpmVersion }}
           nodeVersion: ${{ inputs.nodeVersion }}
           githubToken: ${{ secrets.GH_TOKEN }}
+
+      - name: Set Version
+        run: pnpm run actions-set-version ${{ needs.setup.outputs.version }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
 
       - name: Build Libraries
         run: pnpm run actions-build-libs
@@ -68,9 +70,7 @@ jobs:
         with:
           name: nglibs
           if-no-files-found: error
-          path: ./dist/
-
- 
+          path: ./dist
 
 
 #   create-release:
