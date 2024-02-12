@@ -100,7 +100,7 @@ jobs:
         with:
           name: nglibs-packs
           if-no-files-found: error
-          path: ./pack/*.tgz
+          path: ./dist/pack/*.tgz
 
 #   create-release:
 #     runs-on: ubuntu-latest
