@@ -91,11 +91,6 @@ jobs:
           name: nglibs
           path: ./dist
 
-      - name: dirs
-        run: |
-          ls -al
-          ls -al ./dist
-
       - name: Pack Libraries
         run: pnpm run actions-pack-libs
         env:
@@ -105,7 +100,7 @@ jobs:
         with:
           name: nglibs-packs
           if-no-files-found: error
-          path: ./dist/pack/*.tgz
+          path: ./pack/*.tgz
 
 #   create-release:
 #     runs-on: ubuntu-latest
