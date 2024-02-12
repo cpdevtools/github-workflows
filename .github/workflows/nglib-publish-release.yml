@@ -129,6 +129,13 @@ jobs:
           name: nglibs-packs
           path: ./dist/pack/
 
+      - uses: actions/setup-node@v3
+        with:
+          node-version: ${{ inputs.nodeVersion }}
+          registry-url: https://npm.pkg.github.com/
+          always-auth: true
+          scope: ${{ github.repository_owner }}
+
       - name: Publish Libraries to Github
         run: pnpm run actions-release-libs
         env:
@@ -140,8 +147,8 @@ jobs:
         with:
           node-version: "${{ inputs.nodeVersion }}"
           registry-url: "https://registry.npmjs.org"
-          scope: ${{ github.repository_owner }}
           always-auth: true
+          scope: ${{ github.repository_owner }}
 
 
       - name: Publish Libraries to NPM
