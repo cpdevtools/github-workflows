@@ -1,0 +1,41 @@
+name: Create Nuget Packages
+description: Create nuget packages
+
+inputs:
+  dotnetVersion:
+    description: "The version of .net to install"
+    required: false
+    default: "5.x"
+  pnpmVersion:
+    description: The version of pnpm to install
+    required: false
+    default: 7.26.2
+  nodeVersion:
+    description: The version of NodeJs to install
+    required: false
+    default: 16.18.1
+
+runs:
+  using: composite
+  steps:
+    - name: Install Node & Dependencies
+      uses: cpdevtools/github-workflows/.github/actions/common/node-setup-pnpm@main
+      with:
+        pnpmVersion: "${{ inputs.pnpmVersion }}"
+        nodeVersion: "${{ inputs.nodeVersion }}"
+
+    - name: Install .NET
+      uses: cpdevtools/github-workflows/.github/actions/common/dotnet-setup@main
+      with:
+        runRestore: 'false'
+        dotnetVersion: "${{ inputs.dotnetVersion }}"
+
+    - uses: actions/download-artifact@v4
+      with:
+        name: nuget-packages
+
+    - name: Publish
+      shell: bash
+      run: |
+        dotnet nuget push **/*.nupkg
+        dotnet nuget push **/*.snupkg

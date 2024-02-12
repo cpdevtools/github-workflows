@@ -1,0 +1,10 @@
+name: Check Release Version
+on:
+  workflow_call: 
+
+jobs:
+  check_pr_version:
+    name: Valid Release Version
+    runs-on: ubuntu-latest
+    steps:
+      - uses: cpdevtools/github-workflows/.github/actions/common/check-version@main

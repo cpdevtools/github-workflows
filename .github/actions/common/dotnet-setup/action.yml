@@ -1,0 +1,31 @@
+name: "Setup .Net"
+description: "Setup .Net"
+
+inputs:
+  dotnetVersion:
+    description: "The version of .net to install"
+    required: false
+    default: "5.x"
+
+  runRestore:
+    description: "The version of .net to install"
+    required: false
+    default: 'true'
+
+
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: "${{ inputs.dotnetVersion }}"
+        source-url: https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json
+      env:
+        NUGET_AUTH_TOKEN: ${{ github.token }}
+
+    - name: Restore
+      if: ${{ inputs.runRestore == 'true' }}
+      run: dotnet restore --locked-mode
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
+      shell: bash

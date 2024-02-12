@@ -1,0 +1,12 @@
+name: Create pull request on version change
+on:
+  workflow_call: 
+
+jobs:
+  create_pr:
+    name: Create If New
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Project
+        uses: actions/checkout@v3.3.0
+      - uses: cpdevtools/github-workflows/.github/actions/common/create-release-pull-request@main

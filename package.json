@@ -1,0 +1,24 @@
+{
+  "name": "@cpdevtools/github-workflows",
+  "version": "0.0.1-dev.0",
+  "description": "",
+  "scripts": {
+    "actions-release": "ts-node ./.scripts/create-version-branch.ts"
+  },
+  "keywords": [],
+  "dependencies": {
+    "@octokit/rest": "^19.0.7",
+    "fast-glob": "^3.2.12",
+    "semver": "^7.3.8",
+    "simple-git": "^3.17.0",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.0.3",
+    "yaml": "^2.2.1",
+    "yargs": "^17.7.1"
+  },
+  "devDependencies": {
+    "@types/node": "^18.15.11",
+    "@types/semver": "^7.3.13",
+    "@types/yargs": "^17.0.24"
+  }
+}

@@ -1,0 +1,14 @@
+name: Pull Request
+
+on:
+  pull_request:
+    types:
+      - synchronize
+      - reopened
+    branches:
+      - "release/*"
+
+jobs:
+  check-version:
+    name: Check Version
+    uses: cpdevtools/github-workflows/.github/workflows/check-release-pr-version.yml@main
